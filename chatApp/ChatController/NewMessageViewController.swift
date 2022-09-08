@@ -71,7 +71,7 @@ class NewMessageViewController: UITableViewController {
             let user = self.users[indexPath.row]
             self.messagesViewController?.showChatControllerForUser(user: user)
         }
-        }
-   
+    }
+    
 }
 

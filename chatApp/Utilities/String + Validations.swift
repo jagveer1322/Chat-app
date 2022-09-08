@@ -14,7 +14,7 @@ extension String{
         return applyPredicateOnRegex(regexStr: emailRegEx)
     }
     
- func validatePassword(mini: Int = 8, max: Int = 8) -> Bool {
+    func validatePassword(mini: Int = 8, max: Int = 8) -> Bool {
         //Minimum 8 characters at least 1 Alphabet and 1 Number:
         var passRegEx = ""
         if mini >= max{
@@ -25,7 +25,7 @@ extension String{
         return applyPredicateOnRegex(regexStr: passRegEx)
     }
     
-  private  func applyPredicateOnRegex(regexStr: String) -> Bool{
+    private  func applyPredicateOnRegex(regexStr: String) -> Bool{
         let trimmedString = self.trimmingCharacters(in: .whitespaces)
         let validateOtherString = NSPredicate(format: "SELF MATCHES %@", regexStr)
         let isValidateOtherString = validateOtherString.evaluate(with: trimmedString)

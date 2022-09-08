@@ -67,39 +67,9 @@ class MessagesViewController: UITableViewController {
         }, withCancel: nil)
     }
     
-//    func observeMessages() {
-//
-//        let ref = Database.database().reference().child("messages")
-//
-//        ref.observe(.childAdded, with: { (snapshot) in
-//
-//            if let dictionary = snapshot.value as? [String: AnyObject] {
-//                let message = Message(dictionary: dictionary)
-//                self.messages.append(message)
-//                if let toId = message.toId {
-//                    self.messagesDictionary[toId] = message
-//                    self.messages = Array(self.messagesDictionary.values)
-//                    self.messages.sort(by: { (message1, message2) -> Bool in
-//                        if let timestamp1 = message1.timestamp, let timestamp2 = message2.timestamp {
-//                            return timestamp1.intValue > timestamp2.intValue
-//                        }
-//                        return false
-//                    })
-//                }
-//                print("message")
-//
-//                //this will crash because of background thread
-//                DispatchQueue.main.async(execute: {
-//                    self.tableView.reloadData()
-//                })
-//            }
-//
-//        }, withCancel: nil)
-//    }
-    
     func navigationConfigure(){
         //   observeMessages()
-       observeUserMessages()
+        observeUserMessages()
         
         navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Logout", style: .plain, target: self, action: #selector(tappedLogout))
         navigationItem.rightBarButtonItem = UIBarButtonItem(image: UIImage(named: "chat"), style: .plain, target: self, action: #selector(tappedChat))
@@ -145,9 +115,9 @@ class MessagesViewController: UITableViewController {
     }
     
     func setupNavBarWithUser(_ user: User) {
-//        messages.removeAll()
-//        messagesDictionary.removeAll()
-//        observeUserMessages()
+        //        messages.removeAll()
+        //        messagesDictionary.removeAll()
+        //        observeUserMessages()
         
         let button = UIButton(type: .system)
         button.setTitle(user.username, for: .normal)
@@ -177,7 +147,7 @@ class MessagesViewController: UITableViewController {
     }
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let message = messages[indexPath.row]
-          
+        
         guard let chatPartnerId = message.chatPartnerId() else {
             return
         }
