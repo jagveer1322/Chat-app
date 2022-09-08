@@ -39,9 +39,21 @@ class SignInViewController: UIViewController {
                     
                     self.openAlert(title: "Alert", message: "Login Detail not match", alertStyle: .alert, actionTitles: ["Okay"], actionStyles: [.default], actions: [{_ in }])
                 } else {
-                    print("navigate to home screen")
-                    let chatvc = HomeViewController()
-                    self.navigationController?.pushViewController(chatvc, animated: true)
+                    
+                    
+                    
+//                    let chatvc = MessagesViewController()
+//                    let navController  = UINavigationController(rootViewController: chatvc)
+//                    self.present(navController, animated: true, completion: nil)
+//                    let chatvc = MessagesViewController()
+//                    self.navigationController?.pushViewController(chatvc, animated: true)
+//                    print("navigate to home screen")
+                    let scene = UIApplication.shared.connectedScenes.first
+                    if let sd : SceneDelegate = (scene?.delegate as? SceneDelegate) {
+                        let messagesViewController = MessagesViewController()
+                        let nav = UINavigationController.init(rootViewController: messagesViewController)
+                        sd.window!.rootViewController = nav
+                    }
                 }
             }
             }

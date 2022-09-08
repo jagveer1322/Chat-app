@@ -352,7 +352,7 @@
         </scene>
     </scenes>
     <resources>
-        <image name="face.smiling" catalog="system" width="128" height="121"/>
+        <image name="face.smiling" catalog="system" width="32" height="32"/>
         <image name="mobile-chatting-app" width="4032" height="3024"/>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>

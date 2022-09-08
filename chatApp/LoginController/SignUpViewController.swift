@@ -32,6 +32,7 @@ class SignUpViewController: UIViewController {
     @IBAction func signUpButton(_ sender: UIButton) {
         let imgSystem = UIImage(systemName: "face.smiling")
         if imageProfile.image?.pngData() != imgSystem?.pngData(){
+            guard let profileImage = imageProfile.image else { return }
             
             if let username = usernameTextField.text, let email = emailTextField.text, let password = passwordTextField.text, let confirmPassword = confirmPasswordTextField.text{
                 if username == ""{
@@ -48,27 +49,14 @@ class SignUpViewController: UIViewController {
                 }else
                 {
                     if password == confirmPassword{
-                        Auth.auth().createUser(withEmail: email, password: password) { authResult, error in
-                            if error != nil{
-                                print("something went wrong")
-                                return}
-                            
-                            guard let uid = authResult?.user.uid else {
-                                return
+                        ChatService.shared.registerUserInDatabase(username: username, email: email, password: password, image: profileImage) { isSuccess in
+                            if !isSuccess {
+                                print("error")
                             }
-                            let ref = Database.database().reference(fromURL: "https://chatapp-d4a0f-default-rtdb.firebaseio.com")
-                            let values = ["name": username, "email": email]
-                            let userReference = ref.child("users").child(uid)
-                            userReference.updateChildValues(values) { (error, ref) in
-                                if error != nil{
-                                    print("something went wrong")
-                                    return
-                                }
-                            }
-                            self.navigationController?.popViewController(animated: true)
+                            else {
+                                self.dismiss(animated: true)                            }
                         }
-                        
-                        
+                        navigationController?.popViewController(animated: true)
                     }else{
                         openAlert(title: "Alert", message: "Please enter Same password", alertStyle: .alert, actionTitles: ["Okay"], actionStyles: [.default], actions: [{_ in }])
                     }
@@ -82,22 +70,25 @@ class SignUpViewController: UIViewController {
         }
     }
 }
+
+
 extension SignUpViewController: UINavigationControllerDelegate, UIImagePickerControllerDelegate{
     
     func openGallery(){
         if UIImagePickerController.isSourceTypeAvailable(.savedPhotosAlbum){
             let picker = UIImagePickerController()
+            picker.allowsEditing = true
             picker.delegate = self
-            picker.sourceType = .savedPhotosAlbum
-            present(picker, animated: true)
+            picker.sourceType = .photoLibrary
+            present(picker, animated: true, completion: nil)
         }
     }
     
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-        if let img = info[.originalImage] as? UIImage{
-            imageProfile.image = img
+        if let imageOrignal = info[.originalImage] as? UIImage{
+            imageProfile.image = imageOrignal
         }
-        dismiss(animated: true)
+        picker.dismiss(animated: true)
     }
 }
 
