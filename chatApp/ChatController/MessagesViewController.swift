@@ -9,6 +9,8 @@ import UIKit
 import FirebaseAuth
 import Firebase
 
+
+
 class MessagesViewController: UITableViewController {
     
     let cellId = "cellId"
@@ -25,51 +27,62 @@ class MessagesViewController: UITableViewController {
         tableView.register(UserCell.self, forCellReuseIdentifier: cellId)
         
     }
-    
+
     func observeUserMessages() {
-        guard let uid = Auth.auth().currentUser?.uid else {
-            return
-        }
+        guard let uid = Auth.auth().currentUser?.uid else {return}
+        print("observe user messages")
         
         let ref = Database.database().reference().child("user-messages").child(uid)
         ref.observe(.childAdded, with: { (snapshot) in
             
-            let messageId = snapshot.key
-            let messagesReference = Database.database().reference().child("messages").child(messageId)
-            messagesReference.getData { error, snapshot in
-                if let _ = error{
-                    print("error while fetching")
-                    return
-                }
+            let userId = snapshot.key
+            print(userId)
+            Database.database().reference().child("user-messages").child(uid).child(userId).observe(.childAdded, with: { (snapshot) in
                 
-                if let dictionary = snapshot?.value as? [String: AnyObject] {
-                    let message = Message(dictionary: dictionary)
-                    
-                    if let chatPartnerId = message.chatPartnerId() {
-                        self.messagesDictionary[chatPartnerId] = message
-                        
-                        self.messages = Array(self.messagesDictionary.values)
-                        self.messages.sort(by: { (message1, message2) -> Bool in
-                            if let timestamp1 = message1.timestamp, let timestamp2 = message2.timestamp {
-                                return timestamp1.intValue > timestamp2.intValue
-                            }
-                            return false
-                        })
-                    }
-                    
-                    //this will crash because of background thread
-                    DispatchQueue.main.async(execute: {
-                        self.tableView.reloadData()
-                    })
-                }
-            }
-            
+                let messageId = snapshot.key
+                self.fetchMessageWithMessageId(messageId)
+                
+            }, withCancel: nil)
         }, withCancel: nil)
     }
+
+    func fetchMessageWithMessageId(_ messageId: String) {
+        let messagesReference = Database.database().reference().child("messages").child(messageId)
+
+        messagesReference.observeSingleEvent(of: .value, with: { (snapshot) in
+
+            if let dictionary = snapshot.value as? [String: AnyObject] {
+                let message = Message(dictionary: dictionary)
+
+                if let chatPartnerId = message.chatPartnerId() {
+                    self.messagesDictionary[chatPartnerId] = message
+                }
+
+                self.attemptReloadOfTable()
+            }
+
+            }, withCancel: nil)
+    }
+
+    fileprivate func attemptReloadOfTable() {
+        self.timer?.invalidate()
+
+        self.timer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(self.handleReloadTable), userInfo: nil, repeats: false)
+    }
+
+    var timer: Timer?
+
+    @objc func handleReloadTable() {
+        self.messages = Array(self.messagesDictionary.values)
+        DispatchQueue.main.async(execute: {
+            self.tableView.reloadData()
+        })
+    }
     
+  
     func navigationConfigure(){
-        //   observeMessages()
         observeUserMessages()
+
         
         navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Logout", style: .plain, target: self, action: #selector(tappedLogout))
         navigationItem.rightBarButtonItem = UIBarButtonItem(image: UIImage(named: "chat"), style: .plain, target: self, action: #selector(tappedChat))
@@ -135,17 +148,22 @@ class MessagesViewController: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        print("0")
+        print(messages)
         return messages.count
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: cellId, for: indexPath) as! UserCell
+        print("1")
+        
         let message = messages[indexPath.row]
         cell.message = message
-        
+        print(message)
         return cell
     }
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        print("2")
         let message = messages[indexPath.row]
         
         guard let chatPartnerId = message.chatPartnerId() else {
@@ -165,5 +183,4 @@ class MessagesViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 80
     }
-    
 }
